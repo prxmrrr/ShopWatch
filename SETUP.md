@@ -69,6 +69,8 @@ add two:
 |------------------|-------------------------------------------------------------|
 | `RESEND_API_KEY` | the `re_...` key from Resend                                 |
 | `ALERT_FROM_EMAIL` | the sender, e.g. `ShopWatch <alerts@yourdomain.com>`      |
+| `SITE_URL`       | your live site, e.g. `https://your-site.netlify.app` (optional — enables the unsubscribe link in emails) |
+| `UNSUB_SECRET`   | any random string you make up (optional — secures unsubscribe links) |
 
 If you haven't verified a domain yet, set `ALERT_FROM_EMAIL` to the onboarding
 sender Resend shows you (often `onboarding@resend.dev`).
@@ -123,8 +125,7 @@ today, then Run now.
 
 - Scheduled functions only run on the **published** (production) deploy, not on
   deploy previews.
-- The signup stores a snapshot of the wishlist at save time. If someone changes
-  their wishlist later, they should hit "Save Email" again to update it. (Adding
-  auto-resync on every wishlist change is a possible later improvement.)
-- There's no unsubscribe link yet. If you make this public, add one before
-  sharing widely — happy to build it.
+- The wishlist now auto-syncs: once someone has saved their email, adding or
+  removing items updates their stored alert list automatically.
+- Emails include an unsubscribe link when `SITE_URL` is set. The link hits
+  `/api/unsubscribe` and removes that email's record.

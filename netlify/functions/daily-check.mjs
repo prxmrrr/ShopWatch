@@ -1,6 +1,13 @@
 // Scheduled daily (just after the shop resets at 00:00 UTC).
 // Pulls today's shop, matches every stored wishlist, emails the hits via Resend.
 import { getStore } from '@netlify/blobs';
+import { createHash } from 'node:crypto';
+
+// Must match the recipe in unsubscribe.mjs.
+function tokenFor(email) {
+  const secret = process.env.UNSUB_SECRET || 'shopwatch';
+  return createHash('sha256').update(email.toLowerCase() + secret).digest('hex').slice(0, 16);
+}
 
 const SHOP_URL = 'https://fortnite-api.com/v2/shop?language=en';
 const RESEND_URL = 'https://api.resend.com/emails';
@@ -32,15 +39,24 @@ async function getTodaysShopIds() {
 async function sendEmail(to, matched) {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.ALERT_FROM_EMAIL; // e.g. "ShopWatch <alerts@yourdomain.com>"
+  const siteUrl = (process.env.SITE_URL || '').replace(/\/$/, ''); // e.g. https://your-site.netlify.app
   if (!apiKey || !from) throw new Error('Missing RESEND_API_KEY or ALERT_FROM_EMAIL');
 
   const list = matched.map(m => `<li>${m.name}</li>`).join('');
+  const unsubUrl = siteUrl
+    ? `${siteUrl}/api/unsubscribe?email=${encodeURIComponent(to)}&token=${tokenFor(to)}`
+    : null;
+  const unsubLine = unsubUrl
+    ? `<p style="color:#888;font-size:12px">Don't want these? <a href="${unsubUrl}">Unsubscribe</a>.</p>`
+    : '';
+
   const html = `
     <div style="font-family:sans-serif;max-width:480px">
       <h2>Your wishlisted items are in the shop today</h2>
       <ul>${list}</ul>
       <p>Grab them before the shop rotates at midnight UTC.</p>
       <p style="color:#888;font-size:12px">You're getting this because you set an alert on ShopWatch.</p>
+      ${unsubLine}
     </div>`;
 
   const res = await fetch(RESEND_URL, {
