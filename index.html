@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShopWatch — Fortnite Item Shop Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #050c1a;
+  --bg-card: #0b1628;
+  --bg-card-hover: #101e35;
+  --border: rgba(100,160,255,0.12);
+  --border-glow: rgba(100,160,255,0.35);
+  --text: #e8f0ff;
+  --text-muted: #7a90b8;
+  --text-dim: #4a5f80;
+  --accent: #00d4ff;
+  --accent-dim: rgba(0,212,255,0.15);
+  --accent-2: #a855f7;
+  --accent-2-dim: rgba(168,85,247,0.15);
+  --gold: #f5c542;
+  --gold-dim: rgba(245,197,66,0.15);
+  --danger: #ff4d6d;
+  --success: #22c55e;
+  --font-display: 'Rajdhani', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --radius: 10px;
+  --radius-lg: 16px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,rgba(255,255,255,.5) 0%,transparent 100%),radial-gradient(1px 1px at 80% 10%,rgba(255,255,255,.4) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 50% 70%,rgba(255,255,255,.35) 0%,transparent 100%),radial-gradient(1px 1px at 10% 90%,rgba(255,255,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 90% 80%,rgba(255,255,255,.4) 0%,transparent 100%),radial-gradient(1px 1px at 60% 20%,rgba(255,255,255,.45) 0%,transparent 100%);pointer-events:none;z-index:0}
+.nebula-1{position:fixed;top:-20%;left:-10%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(0,212,255,.04) 0%,transparent 70%);pointer-events:none;z-index:0}
+.nebula-2{position:fixed;bottom:-20%;right:-10%;width:60%;height:60%;background:radial-gradient(ellipse,rgba(168,85,247,.05) 0%,transparent 70%);pointer-events:none;z-index:0}
+.container{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:0 20px}
+
+/* HEADER */
+header{position:sticky;top:0;z-index:100;background:rgba(5,12,26,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 20px}
+.header-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:64px;gap:20px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;cursor:pointer}
+.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent-2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:18px;color:#fff;flex-shrink:0}
+.logo-text{font-family:var(--font-display);font-weight:700;font-size:22px;color:var(--text);letter-spacing:.5px;line-height:1}
+.logo-text span{color:var(--accent)}
+nav{display:flex;align-items:center;gap:4px}
+.nav-btn{background:none;border:none;color:var(--text-muted);font-family:var(--font-body);font-size:14px;font-weight:500;padding:8px 14px;border-radius:8px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.nav-btn:hover{background:rgba(255,255,255,.06);color:var(--text)}
+.nav-btn.active{background:var(--accent-dim);color:var(--accent)}
+.badge{background:var(--accent-2);color:#fff;font-size:11px;font-weight:600;padding:1px 6px;border-radius:20px;min-width:20px;text-align:center}
+
+/* HERO */
+.hero{padding:60px 0 40px;text-align:center}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;background:var(--accent-dim);border:1px solid rgba(0,212,255,.25);border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;margin-bottom:20px}
+.live-dot{width:7px;height:7px;background:var(--success);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+.hero h1{font-family:var(--font-display);font-size:clamp(36px,6vw,72px);font-weight:700;line-height:1.05;letter-spacing:1px;margin-bottom:16px;background:linear-gradient(135deg,#fff 0%,#a0c4ff 50%,var(--accent) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:16px;color:var(--text-muted);max-width:500px;margin:0 auto 32px;line-height:1.6}
+.hero-actions{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+
+/* BUTTONS */
+.btn-primary{background:var(--accent);color:#000;font-family:var(--font-body);font-weight:600;font-size:14px;padding:11px 22px;border-radius:var(--radius);border:none;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+.btn-primary:hover{background:#00bce8;transform:translateY(-1px)}
+.btn-secondary{background:rgba(255,255,255,.07);color:var(--text);font-family:var(--font-body);font-weight:500;font-size:14px;padding:11px 22px;border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s}
+.btn-secondary:hover{background:rgba(255,255,255,.1);border-color:var(--border-glow)}
+.btn-purple{background:var(--accent-2);color:#fff;font-family:var(--font-body);font-weight:600;font-size:14px;padding:11px 22px;border-radius:var(--radius);border:none;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .15s;white-space:nowrap}
+.btn-purple:hover{background:#9333ea}
+.btn-purple:disabled{opacity:.5;cursor:not-allowed}
+
+/* STATS */
+.stats-bar{display:flex;align-items:center;justify-content:center;gap:40px;padding:20px 0 40px;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--accent);line-height:1}
+.stat-label{font-size:12px;color:var(--text-muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.stat-divider{width:1px;height:32px;background:var(--border)}
+
+/* UPDATE BAR */
+.update-bar{background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);border-radius:8px;padding:10px 16px;display:flex;align-items:center;gap:10px;margin-bottom:24px;font-size:13px;color:var(--text-muted)}
+.update-bar svg{color:var(--accent);flex-shrink:0}
+
+/* FILTERS */
+.filters-row{display:flex;align-items:center;gap:10px;margin-bottom:28px;flex-wrap:wrap}
+.filter-label{font-size:12px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;font-weight:600;flex-shrink:0}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.chip{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text-muted);font-size:12px;font-weight:500;padding:5px 12px;border-radius:20px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.chip:hover{border-color:var(--border-glow);color:var(--text)}
+.chip.active{background:var(--accent-dim);border-color:rgba(0,212,255,.4);color:var(--accent)}
+.search-wrap{position:relative;flex-shrink:0}
+.search-wrap svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none}
+.search-input{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:13px;padding:8px 12px 8px 32px;border-radius:var(--radius);width:200px;outline:none;transition:all .15s}
+.search-input::placeholder{color:var(--text-dim)}
+.search-input:focus{border-color:var(--border-glow);background:rgba(255,255,255,.07)}
+
+/* SECTION TITLES */
+.section-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:.5px;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.section-title .tag{font-size:11px;font-family:var(--font-body);font-weight:600;background:var(--gold-dim);color:var(--gold);padding:3px 8px;border-radius:4px;letter-spacing:0;text-transform:uppercase}
+.section-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px}
+
+/* SHOP GRID */
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:60px}
+.shop-section{margin-bottom:44px}
+.shop-section .shop-grid{margin-bottom:0}
+.shop-section-head{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.shop-section-name{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:.5px;color:var(--text);text-transform:uppercase}
+.shop-section-count{font-size:12px;font-weight:600;color:var(--text-dim);background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;padding:2px 9px}
+.item-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:all .2s;position:relative}
+.item-card:hover{border-color:var(--border-glow);background:var(--bg-card-hover);transform:translateY(-3px)}
+.item-card.wishlisted{border-color:rgba(168,85,247,.4)}
+.item-img-wrap{position:relative;aspect-ratio:1;overflow:hidden;background:#0d1f3c}
+.item-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+.item-card:hover .item-img-wrap img{transform:scale(1.05)}
+.item-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:48px;background:linear-gradient(135deg,#0d1f3c,#1a2f55)}
+.rarity-bar{position:absolute;bottom:0;left:0;right:0;height:3px}
+.wishlist-btn{position:absolute;top:8px;right:8px;width:30px;height:30px;background:rgba(5,12,26,.75);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;backdrop-filter:blur(4px);z-index:2}
+.wishlist-btn:hover{background:var(--accent-2-dim);border-color:var(--accent-2);transform:scale(1.1)}
+.wishlist-btn.active{background:var(--accent-2-dim);border-color:var(--accent-2)}
+.wishlist-btn.active svg{fill:var(--accent-2);stroke:none}
+.new-badge{position:absolute;top:8px;left:8px;background:var(--accent);color:#000;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;z-index:2}
+.item-info{padding:10px 12px 12px}
+.item-name{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);line-height:1.2;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;letter-spacing:.3px}
+.item-meta{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.item-rarity{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.item-price{display:flex;align-items:center;gap:4px;font-family:var(--font-display);font-size:14px;font-weight:700;color:var(--gold)}
+.vbucks-icon{width:13px;height:13px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#000;flex-shrink:0}
+
+/* SKELETONS */
+.loading-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-bottom:60px}
+.skeleton{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.skeleton-img{aspect-ratio:1;background:linear-gradient(90deg,rgba(255,255,255,.03) 0%,rgba(255,255,255,.07) 50%,rgba(255,255,255,.03) 100%);background-size:200% 100%;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.skeleton-line{height:12px;background:rgba(255,255,255,.05);border-radius:4px;margin:10px 12px 6px}
+.skeleton-line.short{width:60%;margin:6px 12px 12px}
+
+/* ERROR */
+.error-state{text-align:center;padding:60px 20px}
+.error-icon{font-size:48px;margin-bottom:16px}
+.error-state h3{font-family:var(--font-display);font-size:20px;margin-bottom:8px}
+.error-state p{color:var(--text-muted);font-size:14px;line-height:1.6;max-width:400px;margin:0 auto 20px}
+
+/* ITEM SEARCH */
+.search-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;margin-bottom:40px;position:relative;overflow:hidden}
+.search-section::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(ellipse,rgba(0,212,255,.06) 0%,transparent 70%);pointer-events:none}
+.search-big-wrap{display:flex;gap:10px;flex-wrap:wrap}
+.search-big{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:15px;padding:13px 18px;border-radius:var(--radius);flex:1;min-width:240px;outline:none;transition:all .15s}
+.search-big::placeholder{color:var(--text-dim)}
+.search-big:focus{border-color:var(--border-glow);background:rgba(255,255,255,.07)}
+.search-results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-top:20px}
+.search-hint{font-size:13px;color:var(--text-dim);margin-top:16px;line-height:1.6}
+.search-no-results{text-align:center;padding:40px;color:var(--text-muted);font-size:14px}
+
+/* WISHLIST EMPTY */
+.wishlist-empty{text-align:center;padding:80px 20px;border:1px dashed var(--border);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center}
+.wishlist-empty-icon{font-size:56px;margin-bottom:16px;opacity:.4}
+.wishlist-empty h3{font-family:var(--font-display);font-size:22px;margin-bottom:8px;color:var(--text-muted)}
+.wishlist-empty p{color:var(--text-dim);font-size:14px}
+
+/* NOTIFY */
+.notify-section{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;margin-bottom:40px;position:relative;overflow:hidden}
+.notify-section::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(ellipse,rgba(168,85,247,.1) 0%,transparent 70%);pointer-events:none}
+.notify-header{display:flex;align-items:flex-start;gap:20px;margin-bottom:24px;flex-wrap:wrap}
+.notify-icon-wrap{width:52px;height:52px;background:var(--accent-2-dim);border:1px solid rgba(168,85,247,.3);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notify-title{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:.5px;margin-bottom:4px}
+.notify-desc{font-size:14px;color:var(--text-muted);line-height:1.5}
+.notify-form{display:flex;gap:10px;flex-wrap:wrap}
+.text-input{background:rgba(255,255,255,.05);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:14px;padding:11px 14px;border-radius:var(--radius);flex:1;min-width:220px;outline:none;transition:all .15s}
+.text-input::placeholder{color:var(--text-dim)}
+.text-input:focus{border-color:rgba(168,85,247,.5);background:rgba(168,85,247,.05)}
+.success-msg{background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);color:var(--success);border-radius:var(--radius);padding:12px 16px;font-size:14px;margin-top:12px;display:none;align-items:center;gap:8px}
+.success-msg.show{display:flex}
+.notify-item-tag{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px 6px 12px;font-size:13px;color:var(--text)}
+.notify-item-tag .remove-tag{background:none;border:none;color:var(--text-dim);cursor:pointer;display:flex;padding:0;transition:color .15s}
+.notify-item-tag .remove-tag:hover{color:var(--danger)}
+
+/* PAGE SECTIONS */
+.page-section{display:none}
+.page-section.active{display:block}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:#0d1c30;border:1px solid var(--border-glow);border-radius:20px;width:100%;max-width:540px;overflow:hidden;transform:translateY(20px);transition:transform .25s;position:relative;max-height:90vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-img{width:100%;aspect-ratio:1;object-fit:cover;display:block;max-height:320px;background:#0d1f3c}
+.modal-img-placeholder{width:100%;height:260px;background:linear-gradient(135deg,#0d1f3c,#1a2f55);display:flex;align-items:center;justify-content:center;font-size:80px}
+.modal-body{padding:24px}
+.modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;background:rgba(5,12,26,.8);border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);transition:all .15s;backdrop-filter:blur(4px);z-index:10}
+.modal-close:hover{color:var(--text);border-color:var(--border-glow)}
+.modal-rarity-tag{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:4px 10px;border-radius:4px;margin-bottom:10px}
+.modal-name{font-family:var(--font-display);font-size:28px;font-weight:700;letter-spacing:.5px;margin-bottom:8px}
+.modal-desc{font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:20px}
+.modal-price-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:14px 16px;background:var(--gold-dim);border:1px solid rgba(245,197,66,.2);border-radius:var(--radius)}
+.modal-price{font-family:var(--font-display);font-size:32px;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:8px}
+.modal-vbucks{width:20px;height:20px;background:var(--accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#000}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+.modal-actions .btn-primary,.modal-actions .btn-secondary{flex:1;min-width:120px;justify-content:center}
+.in-shop-badge{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--success);border-radius:6px;padding:8px 14px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--bg-card);border:1px solid var(--border-glow);border-radius:10px;padding:14px 18px;font-size:14px;color:var(--text);z-index:999;display:flex;align-items:center;gap:10px;transform:translateY(80px);opacity:0;transition:all .3s;max-width:340px;backdrop-filter:blur(12px)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:30px 20px;text-align:center;color:var(--text-dim);font-size:12px;line-height:1.7;position:relative;z-index:1}
+footer a{color:var(--text-muted);text-decoration:none}
+footer a:hover{color:var(--accent)}
+
+@media(max-width:600px){
+  .stats-bar{gap:20px}
+  .stat-divider{display:none}
+  nav{display:none}
+  .shop-grid,.loading-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+  .notify-section,.search-section{padding:20px}
+}
+</style>
+</head>
+<body>
+<div class="nebula-1"></div>
+<div class="nebula-2"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="logo" onclick="showSection('shop')">
+      <div class="logo-icon">FN</div>
+      <div class="logo-text">Shop<span>Watch</span></div>
+    </div>
+    <nav>
+      <button class="nav-btn active" id="nav-shop" onclick="showSection('shop')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Today's Shop
+      </button>
+      <button class="nav-btn" id="nav-search" onclick="showSection('search')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Find Items
+      </button>
+      <button class="nav-btn" id="nav-wishlist" onclick="showSection('wishlist')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        Wishlist
+        <span class="badge" id="wishlist-count">0</span>
+      </button>
+      <button class="nav-btn" id="nav-notify" onclick="showSection('notify')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Alerts
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow"><span class="live-dot"></span>Live Shop — Updates Daily</div>
+    <h1>Fortnite Item Shop</h1>
+    <p class="hero-sub">Track today's shop, search every cosmetic ever made, wishlist your favorites, and get notified the moment they return.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="showSection('shop')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+        Browse Shop
+      </button>
+      <button class="btn-secondary" onclick="showSection('search')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search All Items
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num" id="stat-items">—</div><div class="stat-label">In Shop Today</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><div class="stat-num" id="stat-new">—</div><div class="stat-label">New Items</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><div class="stat-num" id="stat-wishlisted">0</div><div class="stat-label">Wishlisted</div></div>
+    <div class="stat-divider"></div>
+    <div class="stat"><div class="stat-num" id="stat-refresh">—</div><div class="stat-label">Resets In</div></div>
+  </div>
+
+  <!-- TODAY'S SHOP -->
+  <div id="section-shop" class="page-section active">
+    <div class="update-bar" id="update-bar" style="display:none">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span id="update-text">Loading…</span>
+    </div>
+    <div class="filters-row" id="filters-row" style="display:none">
+      <span class="filter-label">Filter</span>
+      <div class="filter-chips" id="filter-chips"></div>
+      <div class="search-wrap">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" class="search-input" placeholder="Search shop…" id="shop-search" oninput="renderShop()">
+      </div>
+    </div>
+    <div class="section-title" id="shop-title" style="display:none">Featured Items <span class="tag">Today</span></div>
+    <div class="section-sub" id="shop-sub" style="display:none">Click any item for details. Heart it to add to your wishlist.</div>
+
+    <div class="loading-grid" id="loading-grid">
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+      <div class="skeleton"><div class="skeleton-img"></div><div class="skeleton-line"></div><div class="skeleton-line short"></div></div>
+    </div>
+
+    <div id="shop-grid-wrap" style="display:none">
+      <div id="shop-grid"></div>
+    </div>
+
+    <div id="error-state" style="display:none" class="error-state">
+      <div class="error-icon">⚠️</div>
+      <h3>Couldn't load the shop</h3>
+      <p>The Fortnite shop API is currently unavailable. The shop resets at midnight UTC and may be briefly down during the update.</p>
+      <button class="btn-primary" onclick="loadShop()" style="margin:0 auto">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        Retry
+      </button>
+    </div>
+  </div>
+
+  <!-- FIND ANY ITEM -->
+  <div id="section-search" class="page-section">
+    <div class="section-title" style="margin-bottom:6px">Find Any Item</div>
+    <div class="section-sub">Search every cosmetic ever added to Fortnite — outfits, emotes, pickaxes, and more. Wishlist anything so you're notified when it hits the shop.</div>
+
+    <div class="search-section">
+      <div class="search-big-wrap">
+        <input type="text" class="search-big" id="cosmetic-search" placeholder="Search by name — e.g. Renegade Raider, Skull Trooper…" oninput="debounceSearch()">
+        <button class="btn-primary" onclick="searchCosmetics()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search
+        </button>
+      </div>
+      <div class="search-hint" id="search-hint">Start typing to search the full Fortnite cosmetics catalog. Results pull directly from fortnite-api.com.</div>
+      <div id="search-loading" style="display:none;margin-top:16px;color:var(--text-muted);font-size:13px">
+        <span style="animation:pulse 1s infinite;display:inline-block">Searching…</span>
+      </div>
+      <div class="search-results-grid" id="search-results-grid"></div>
+      <div id="search-no-results" style="display:none" class="search-no-results">No cosmetics found for that name. Try a different spelling.</div>
+    </div>
+  </div>
+
+  <!-- WISHLIST -->
+  <div id="section-wishlist" class="page-section">
+    <div class="section-title" style="margin-bottom:6px">Your Wishlist</div>
+    <div class="section-sub">Items you're tracking. Items currently in the shop are highlighted. Use "Find Items" to add anything not yet in the shop.</div>
+    <div id="wishlist-empty" class="wishlist-empty">
+      <div class="wishlist-empty-icon">🎮</div>
+      <h3>No items wishlisted yet</h3>
+      <p>Browse the shop or search all cosmetics, then hit the heart icon on any item.</p>
+    </div>
+    <div class="shop-grid" id="wishlist-grid"></div>
+  </div>
+
+  <!-- ALERTS -->
+  <div id="section-notify" class="page-section">
+    <div class="section-title" style="margin-bottom:20px">Email Alerts</div>
+
+    <div class="notify-section">
+      <div class="notify-header">
+        <div class="notify-icon-wrap">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        </div>
+        <div>
+          <div class="notify-title">Get notified when items return</div>
+          <div class="notify-desc">Enter your email and we'll alert you the day any wishlisted item appears in the shop.</div>
+        </div>
+      </div>
+      <div class="notify-form">
+        <input type="email" class="text-input" id="email-input" placeholder="your@email.com">
+        <button class="btn-purple" onclick="saveEmail()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Email
+        </button>
+      </div>
+      <div class="success-msg" id="email-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Email saved! You'll be alerted when wishlisted items return.
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-bottom:16px">Watching these items</div>
+    <div id="notify-wishlist-view" style="color:var(--text-muted);font-size:14px;padding:20px 0">Add items to your wishlist and they'll appear here.</div>
+
+    <div class="notify-section" style="margin-top:40px">
+      <div class="notify-header">
+        <div class="notify-icon-wrap" style="background:var(--accent-dim);border-color:rgba(0,212,255,.3)">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><polyline points="8 21 12 17 16 21"/><line x1="12" y1="17" x2="12" y2="3"/></svg>
+        </div>
+        <div>
+          <div class="notify-title">How alerts work</div>
+          <div class="notify-desc">ShopWatch checks the Fortnite item shop every day at midnight UTC. When a wishlisted item appears, an alert is sent to your email automatically.</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:4px">
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:20px;margin-bottom:8px">1️⃣</div>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:600;margin-bottom:4px">Browse or search</div>
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.5">Find items in today's shop or use "Find Items" to search the full catalog.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:20px;margin-bottom:8px">2️⃣</div>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:600;margin-bottom:4px">Heart it</div>
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.5">Tap the heart on any item to add it to your wishlist.</div>
+        </div>
+        <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:16px">
+          <div style="font-size:20px;margin-bottom:8px">3️⃣</div>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:600;margin-bottom:4px">Get the alert</div>
+          <div style="font-size:13px;color:var(--text-muted);line-height:1.5">Receive an email the day your item hits the shop.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:rgba(245,197,66,.06);border:1px solid rgba(245,197,66,.2);border-radius:var(--radius);padding:14px 18px;margin-top:20px;font-size:13px;color:#c9a830;line-height:1.6">
+      <strong>Backend required:</strong> Real email delivery needs a server (Node.js/Python + SendGrid or Resend) that checks the shop daily and fires emails. This prototype stores your preferences in <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px">localStorage</code> — wire your backend to <code style="background:rgba(0,0,0,.3);padding:2px 6px;border-radius:4px">POST /api/alerts</code> to activate it.
+    </div>
+  </div>
+
+</main>
+
+<!-- ITEM MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalDirect()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-icon"></span><span id="toast-text"></span></div>
+
+<footer>
+  <div class="container">
+    <p>ShopWatch is a fan-made tracker, not affiliated with Epic Games or Fortnite.</p>
+    <p style="margin-top:6px">Item data &amp; images via <a href="https://fortnite-api.com" target="_blank">fortnite-api.com</a> · Prices in V-Bucks</p>
+  </div>
+</footer>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────────
+const API = 'https://fortnite-api.com';
+let shopItems = [];         // today's live shop items
+let wishlist = JSON.parse(localStorage.getItem('fn-wishlist-v2') || '[]');
+// wishlist entries: { id, name, type, rarityKey, price, image, description }
+let savedEmail = localStorage.getItem('fn-email') || '';
+let activeFilter = 'all';
+let currentItem = null;
+let searchTimer = null;
+
+// ── RARITY ────────────────────────────────────────────────────────────────────
+const RARITY_COLORS = {
+  common:'#8a9bbf', uncommon:'#4ade80', rare:'#60a5fa', epic:'#c084fc',
+  legendary:'#fb923c', mythic:'#fbbf24', gaminglegends:'#ec4899',
+  marvel:'#ef4444', starwars:'#a3e635', dc:'#38bdf8', icon:'#06b6d4',
+  shadow:'#6b7280', slurp:'#2dd4bf', dark:'#a855f7', frozen:'#93c5fd', lava:'#f97316',
+};
+function rarityColor(key) {
+  return RARITY_COLORS[(key||'').toLowerCase().replace(/\s/g,'')] || '#8a9bbf';
+}
+function rarityLabel(key) {
+  if (!key) return 'Common';
+  return key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g,' $1').trim();
+}
+function typeEmoji(type) {
+  const m = {Outfit:'🧍',Emote:'💃',Pickaxe:'⛏️',Glider:'🪂',Wrap:'🎁',Bundle:'📦','Back Bling':'🎒','Loading Screen':'🖼️',Music:'🎵','Jam Track':'🎶',Instrument:'🎸',Car:'🏎️',Spray:'🎨',Banner:'🚩',Contrail:'✨'};
+  return m[type] || '⭐';
+}
+
+// ── COUNTDOWN ─────────────────────────────────────────────────────────────────
+function updateCountdown() {
+  const now = new Date();
+  const next = new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),now.getUTCDate()+1));
+  const diff = next - now;
+  const h = Math.floor(diff/3600000), m = Math.floor((diff%3600000)/60000);
+  document.getElementById('stat-refresh').textContent = h+'h '+m+'m';
+}
+setInterval(updateCountdown, 30000);
+updateCountdown();
+
+// ── NORMALISE SHOP ENTRY ───────────────────────────────────────────────────────
+// Classify an item's type into: a within-section sort rank, and (if it belongs
+// in its own top-level section) a dedicated category name.
+// Sort rank: 0 = skins/outfits, 1 = emotes, 2 = everything else (accessories).
+function classifyType(type) {
+  const t = (type || '').toLowerCase();
+
+  // Dedicated sections. Order matters: "sidekick" contains "kick", so match
+  // Sidekicks first and anchor the Kicks pattern with word boundaries so it
+  // can't catch the "kick" inside "sidekick".
+  let dedicated = null;
+  if (/\bside[\s-]?kicks?\b|\bpets?\b|\bcritters?\b|\bcompanions?\b/.test(t)) dedicated = 'Sidekicks';
+  else if (/\bkicks?\b|\bshoes?\b|\bsneakers?\b|footwear/.test(t)) dedicated = 'Kicks';
+  else if (/\bvehicle\b|\bcar\b|\bride\b|\bdecal\b|car body|vehicle wrap|wheel/.test(t)) dedicated = 'Vehicles';
+
+  // Within-section ordering.
+  let rank = 2;
+  if (/outfit|skin|character/.test(t)) rank = 0;
+  else if (/emote|dance|emoticon/.test(t)) rank = 1;
+
+  return { dedicated, rank };
+}
+
+// Helper: turn a single raw cosmetic (any class) into a display item.
+function itemFromCosmetic(raw, entry, sectionName) {
+  const isTrack = !!raw.title && !raw.name;
+  let name = raw.name || raw.title || 'Unknown';
+  if (isTrack && raw.title) name = raw.artist ? `${raw.title} — ${raw.artist}` : raw.title;
+
+  let type = raw.type?.displayValue;
+  if (!type) {
+    if (isTrack) type = 'Jam Track';
+    else if (entry.instruments) type = 'Instrument';
+    else if (entry.cars) type = 'Car';
+    else type = 'Item';
+  }
+  const { dedicated, rank } = classifyType(type);
+  return {
+    id: raw.id,
+    name,
+    description: raw.description || '',
+    type,
+    rarityKey: raw.rarity?.value || (isTrack ? 'icon' : 'common'),
+    image: raw.images?.featured || raw.images?.icon || raw.images?.smallIcon
+      || raw.images?.other || raw.albumArt || null,
+    sectionName,
+    typeRank: rank,
+    dedicatedCategory: dedicated,
+  };
+}
+
+// Returns an ARRAY of display items for one shop entry:
+// a standalone item -> [item]; a bundle -> [bundleCard, ...interiorPieces].
+function normaliseEntry(entry) {
+  const items = entry.brItems || entry.items
+    || entry.tracks || entry.instruments || entry.cars || [];
+  if (items.length === 0 && !entry.bundle) return [];
+
+  // In-game section name (the row header). Fall back across schema variants.
+  const sectionName =
+    entry.layout?.name || entry.section?.name || entry.layout?.category
+    || (entry.bundle ? 'Bundles' : 'Item Shop');
+
+  const displayImg =
+    entry.newDisplayAsset?.renderImages?.[0]?.image ||
+    entry.newDisplayAsset?.materialInstances?.[0]?.images?.Background ||
+    null;
+
+  if (entry.bundle) {
+    const isVehicleEntry = !!entry.cars;
+    const bundleCard = {
+      id: 'bundle_' + (entry.bundle.name||'').replace(/\s+/g,'_').toLowerCase(),
+      name: entry.bundle.name || 'Bundle',
+      description: entry.bundle.info || '',
+      type: 'Bundle',
+      rarityKey: entry.rarity?.value || 'legendary',
+      price: entry.finalPrice ?? entry.regularPrice ?? 0,
+      regularPrice: entry.regularPrice ?? 0,
+      image: entry.bundle.image || displayImg
+        || (items[0]?.images?.featured || items[0]?.images?.icon || null),
+      isNew: false,
+      sectionName,
+      isBundle: true,
+      typeRank: -1,          // bundle card always sorts first in its section
+    };
+    // Interior pieces: the API prices the bundle as a whole, not each piece,
+    // so pieces are shown in the same section without a standalone price.
+    let pieces = items.map(raw => {
+      const it = itemFromCosmetic(raw, entry, sectionName);
+      it.price = 0;          // no per-piece price from the API
+      it.regularPrice = 0;
+      it.isNew = false;
+      it.partOfBundle = bundleCard.name;
+      return it;
+    });
+    // Vehicles: don't list each included decal/wrap, just the vehicle itself.
+    if (isVehicleEntry) {
+      pieces = pieces.filter(it => !/(wrap|decal|skin)/i.test(it.type));
+    }
+    return [bundleCard, ...pieces];
+  }
+
+  // Standalone entry: one priced card (the lead item).
+  const lead = itemFromCosmetic(items[0], entry, sectionName);
+  lead.price = entry.finalPrice ?? entry.regularPrice ?? 0;
+  lead.regularPrice = entry.regularPrice ?? 0;
+  lead.isNew = !!entry.newDisplayAsset;
+  if (displayImg) lead.image = displayImg;
+  return [lead];
+}
+
+// ── LOAD LIVE SHOP ────────────────────────────────────────────────────────────
+async function loadShop() {
+  document.getElementById('loading-grid').style.display = 'grid';
+  document.getElementById('shop-grid-wrap').style.display = 'none';
+  document.getElementById('error-state').style.display = 'none';
+  document.getElementById('update-bar').style.display = 'none';
+  document.getElementById('filters-row').style.display = 'none';
+  document.getElementById('shop-title').style.display = 'none';
+  document.getElementById('shop-sub').style.display = 'none';
+
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(API+'/v2/shop?language=en', {signal: ctrl.signal});
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+
+    // Current /v2/shop returns a single flat data.entries[] array.
+    // Older/mirrored responses split into featured/daily/etc — support both.
+    const d = data.data || {};
+    const sections = Array.isArray(d.entries) && d.entries.length
+      ? d.entries
+      : [
+          ...(d.featured?.entries||[]),
+          ...(d.daily?.entries||[]),
+          ...(d.specialFeatured?.entries||[]),
+          ...(d.specialDaily?.entries||[]),
+          ...(d.voted?.entries||[]),
+          ...(d.voteWinnersGroup?.entries||[]),
+        ];
+
+    const seen = new Set();
+    shopItems = [];
+    for (const entry of sections) {
+      for (const item of normaliseEntry(entry)) {
+        if (item && item.id && !seen.has(item.id)) {
+          seen.add(item.id);
+          shopItems.push(item);
+        }
+      }
+    }
+
+    if (shopItems.length === 0) throw new Error('Empty shop');
+
+    // TEMP DEBUG: log each item's real type + where it routed. Remove later.
+    console.group('%cShopWatch item types','color:#00d4ff;font-weight:bold');
+    console.table(shopItems.map(i => ({
+      name: i.name,
+      type: i.type,
+      section: i.dedicatedCategory || i.sectionName,
+      bundle: i.partOfBundle || (i.isBundle ? '(bundle card)' : ''),
+    })));
+    console.groupEnd();
+
+    document.getElementById('stat-items').textContent = shopItems.length;
+    document.getElementById('stat-new').textContent = shopItems.filter(i=>i.isNew).length;
+    const dateStr = data.data?.date ? new Date(data.data.date).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : null;
+    document.getElementById('update-text').textContent =
+      (dateStr ? 'Shop updated at '+dateStr : 'Live shop data') + ' · Resets daily at midnight UTC';
+
+    buildFilterChips();
+    renderShop();
+
+    document.getElementById('loading-grid').style.display = 'none';
+    document.getElementById('shop-grid-wrap').style.display = 'block';
+    document.getElementById('update-bar').style.display = 'flex';
+    document.getElementById('filters-row').style.display = 'flex';
+    document.getElementById('shop-title').style.display = 'flex';
+    document.getElementById('shop-sub').style.display = 'block';
+
+    checkWishlistInShop();
+
+  } catch(e) {
+    console.error('Shop load failed:', e);
+    document.getElementById('loading-grid').style.display = 'none';
+    document.getElementById('error-state').style.display = 'block';
+    document.getElementById('stat-items').textContent = '—';
+    document.getElementById('stat-new').textContent = '—';
+  }
+}
+
+// ── FILTER + RENDER SHOP ──────────────────────────────────────────────────────
+function buildFilterChips() {
+  const types = [...new Set(shopItems.map(i=>i.type))].sort();
+  const el = document.getElementById('filter-chips');
+  el.innerHTML = `<button class="chip active" onclick="setFilter('all',this)">All (${shopItems.length})</button>`;
+  for (const t of types) {
+    const n = shopItems.filter(i=>i.type===t).length;
+    el.innerHTML += `<button class="chip" onclick="setFilter('${t}',this)">${t} (${n})</button>`;
+  }
+}
+
+function setFilter(type, el) {
+  activeFilter = type;
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderShop();
+}
+
+function renderShop() {
+  const q = (document.getElementById('shop-search')?.value||'').toLowerCase();
+  const items = shopItems.filter(i => {
+    const typeOk = activeFilter==='all' || i.type===activeFilter;
+    const searchOk = !q || i.name.toLowerCase().includes(q) || i.type.toLowerCase().includes(q);
+    return typeOk && searchOk;
+  });
+
+  const container = document.getElementById('shop-grid');
+  container.innerHTML = '';
+
+  // Decide each item's destination section:
+  // bundle pieces stay with their bundle's section; otherwise a Kick/Sidekick/
+  // Vehicle goes to its dedicated section; otherwise the item's shop section.
+  const order = [];
+  const groups = new Map();
+  const sectionOf = it =>
+    it.partOfBundle ? it.sectionName
+    : (it.dedicatedCategory || it.sectionName || 'Item Shop');
+
+  for (const item of items) {
+    const key = sectionOf(item);
+    if (!groups.has(key)) { groups.set(key, []); order.push(key); }
+    groups.get(key).push(item);
+  }
+
+  // Section ordering: keep shop order, but force Jam Tracks to the very bottom,
+  // and place the dedicated cosmetic sections after the themed/shop sections.
+  const sectionWeight = name => {
+    if (name === 'Jam Tracks') return 100;
+    if (name === 'Vehicles') return 60;
+    if (name === 'Sidekicks') return 55;
+    if (name === 'Kicks') return 50;
+    return 0; // themed + general shop sections keep their natural order
+  };
+  order.sort((a, b) => {
+    const wa = sectionWeight(a), wb = sectionWeight(b);
+    if (wa !== wb) return wa - wb;
+    return 0; // stable: equal-weight sections keep first-seen order
+  });
+
+  for (const sectionName of order) {
+    const block = document.createElement('section');
+    block.className = 'shop-section';
+
+    const head = document.createElement('div');
+    head.className = 'shop-section-head';
+    head.innerHTML = `<span class="shop-section-name">${sectionName}</span>
+      <span class="shop-section-count">${groups.get(sectionName).length}</span>`;
+    block.appendChild(head);
+
+    const grid = document.createElement('div');
+    grid.className = 'shop-grid';
+    for (const item of orderWithinSection(groups.get(sectionName))) {
+      // Bundle pieces have no standalone price; don't show a 0 V-Bucks tag on them.
+      grid.appendChild(createCard(item, !item.partOfBundle));
+    }
+    block.appendChild(grid);
+    container.appendChild(block);
+  }
+}
+
+// Order items inside one section:
+//  - each bundle is a contiguous block (bundle card, then its skins/emotes/accessories)
+//  - standalone (non-bundle) items sort skins → emotes → accessories
+//  - bundles lead the section, standalone items follow
+function orderWithinSection(list) {
+  const bundles = new Map();   // bundle name -> [pieces incl. card]
+  const bundleOrder = [];
+  const standalone = [];
+
+  for (const it of list) {
+    if (it.isBundle) {
+      if (!bundles.has(it.name)) { bundles.set(it.name, []); bundleOrder.push(it.name); }
+      bundles.get(it.name).unshift(it); // card first
+    } else if (it.partOfBundle) {
+      if (!bundles.has(it.partOfBundle)) { bundles.set(it.partOfBundle, []); bundleOrder.push(it.partOfBundle); }
+      bundles.get(it.partOfBundle).push(it);
+    } else {
+      standalone.push(it);
+    }
+  }
+
+  const byTypeRank = (a, b) => (a.typeRank ?? 2) - (b.typeRank ?? 2);
+  for (const name of bundleOrder) {
+    const arr = bundles.get(name);
+    const card = arr.find(x => x.isBundle);
+    const pieces = arr.filter(x => !x.isBundle).sort(byTypeRank);
+    bundles.set(name, card ? [card, ...pieces] : pieces);
+  }
+  standalone.sort(byTypeRank);
+
+  const out = [];
+  for (const name of bundleOrder) out.push(...bundles.get(name));
+  out.push(...standalone);
+  return out;
+}
+
+// ── ITEM CARD ─────────────────────────────────────────────────────────────────
+function createCard(item, showPrice=true) {
+  const isW = wishlist.some(w=>w.id===item.id);
+  const color = rarityColor(item.rarityKey);
+  const card = document.createElement('div');
+  card.className = 'item-card'+(isW?' wishlisted':'');
+  card.setAttribute('data-id', item.id);
+
+  const imgHtml = item.image
+    ? `<img src="${item.image}" alt="${item.name}" loading="lazy"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+  const phStyle = item.image ? 'display:none' : '';
+
+  card.innerHTML = `
+    <div class="item-img-wrap">
+      ${imgHtml}
+      <div class="item-img-placeholder" style="${phStyle}">${typeEmoji(item.type)}</div>
+      <div class="rarity-bar" style="background:${color}"></div>
+      ${item.isNew ? '<div class="new-badge">New</div>' : ''}
+      <button class="wishlist-btn${isW?' active':''}" onclick="toggleWishlist(event,'${item.id}')" title="${isW?'Remove from wishlist':'Add to wishlist'}">
+        <svg width="14" height="14" viewBox="0 0 24 24" stroke="${isW?'none':'var(--text-muted)'}" fill="${isW?'var(--accent-2)':'none'}" stroke-width="2">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="item-info">
+      <div class="item-name" title="${item.name}">${item.name}</div>
+      <div class="item-meta">
+        <span class="item-rarity" style="color:${color}">${rarityLabel(item.rarityKey)}</span>
+        ${showPrice && item.price ? `<div class="item-price"><div class="vbucks-icon">V</div>${item.price.toLocaleString()}</div>` : ''}
+      </div>
+    </div>`;
+
+  card.addEventListener('click', e => { if (!e.target.closest('.wishlist-btn')) openModal(item); });
+  return card;
+}
+
+// ── COSMETIC SEARCH (full catalog) ────────────────────────────────────────────
+let lastQuery = '';
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  const q = document.getElementById('cosmetic-search').value.trim();
+  if (q.length < 2) {
+    document.getElementById('search-results-grid').innerHTML = '';
+    document.getElementById('search-no-results').style.display = 'none';
+    document.getElementById('search-hint').style.display = 'block';
+    document.getElementById('search-loading').style.display = 'none';
+    return;
+  }
+  searchTimer = setTimeout(searchCosmetics, 420);
+}
+
+async function searchCosmetics() {
+  const q = document.getElementById('cosmetic-search').value.trim();
+  if (!q || q.length < 2) return;
+  if (q === lastQuery) return;
+  lastQuery = q;
+
+  document.getElementById('search-hint').style.display = 'none';
+  document.getElementById('search-loading').style.display = 'block';
+  document.getElementById('search-results-grid').innerHTML = '';
+  document.getElementById('search-no-results').style.display = 'none';
+
+  try {
+    const url = `${API}/v2/cosmetics/br/search/all?language=en&searchLanguage=en&matchMethod=contains&name=${encodeURIComponent(q)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    const results = (data.data || []).slice(0, 40); // cap at 40
+
+    document.getElementById('search-loading').style.display = 'none';
+
+    if (results.length === 0) {
+      document.getElementById('search-no-results').style.display = 'block';
+      return;
+    }
+
+    const grid = document.getElementById('search-results-grid');
+    grid.innerHTML = '';
+    for (const cos of results) {
+      const item = {
+        id: cos.id,
+        name: cos.name || cos.title || 'Unknown',
+        description: cos.description || '',
+        type: cos.type?.displayValue || 'Item',
+        rarityKey: cos.rarity?.value || 'common',
+        price: cos.price || 0, // catalog items may not have price
+        regularPrice: cos.price || 0,
+        image: cos.images?.featured || cos.images?.icon || cos.images?.smallIcon || cos.images?.other || cos.albumArt || null,
+        isNew: false,
+        inShop: shopItems.some(s=>s.id===cos.id),
+      };
+      grid.appendChild(createCard(item, !!item.price));
+    }
+
+  } catch(e) {
+    console.error('Search failed:', e);
+    document.getElementById('search-loading').style.display = 'none';
+    document.getElementById('search-no-results').style.display = 'block';
+    document.getElementById('search-no-results').textContent = 'Search failed — check your connection and try again.';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('cosmetic-search').addEventListener('keydown', e => {
+    if (e.key === 'Enter') searchCosmetics();
+  });
+});
+
+// ── WISHLIST ──────────────────────────────────────────────────────────────────
+function toggleWishlist(e, id) {
+  if (e) e.stopPropagation();
+
+  // Find item data from shop or search results
+  const shopItem = shopItems.find(i=>i.id===id);
+  const cardEl = document.querySelector(`.item-card[data-id="${id}"]`);
+
+  if (wishlist.some(w=>w.id===id)) {
+    wishlist = wishlist.filter(w=>w.id!==id);
+    showToast('Removed from wishlist','🗑️');
+  } else {
+    // Build entry from available data
+    let entry = shopItem || null;
+    if (!entry && cardEl) {
+      entry = {
+        id,
+        name: cardEl.querySelector('.item-name')?.textContent || id,
+        type: 'Item',
+        rarityKey: 'common',
+        price: 0,
+        image: cardEl.querySelector('img')?.src || null,
+        description: '',
+      };
+    }
+    if (entry) {
+      wishlist.push({
+        id: entry.id, name: entry.name, type: entry.type,
+        rarityKey: entry.rarityKey, price: entry.price,
+        image: entry.image, description: entry.description||'',
+      });
+    }
+    showToast('Added to wishlist! ❤️','✅');
+  }
+
+  localStorage.setItem('fn-wishlist-v2', JSON.stringify(wishlist));
+  syncWishlistUI();
+}
+
+function syncWishlistUI() {
+  const count = wishlist.length;
+  document.getElementById('wishlist-count').textContent = count;
+  document.getElementById('stat-wishlisted').textContent = count;
+
+  // Update all visible cards
+  document.querySelectorAll('.item-card').forEach(card => {
+    const id = card.getAttribute('data-id');
+    const isW = wishlist.some(w=>w.id===id);
+    const btn = card.querySelector('.wishlist-btn');
+    const svg = btn?.querySelector('svg');
+    card.classList.toggle('wishlisted', isW);
+    if (btn) btn.classList.toggle('active', isW);
+    if (svg) {
+      svg.setAttribute('fill', isW ? 'var(--accent-2)' : 'none');
+      svg.setAttribute('stroke', isW ? 'none' : 'var(--text-muted)');
+    }
+  });
+
+  // Refresh wishlist view if open
+  const wSection = document.getElementById('section-wishlist');
+  if (wSection.classList.contains('active')) renderWishlist();
+
+  updateNotifyView();
+}
+
+function renderWishlist() {
+  const grid = document.getElementById('wishlist-grid');
+  const empty = document.getElementById('wishlist-empty');
+  grid.innerHTML = '';
+
+  if (wishlist.length === 0) { empty.style.display = 'flex'; return; }
+  empty.style.display = 'none';
+
+  for (const entry of wishlist) {
+    const inShop = shopItems.some(s=>s.id===entry.id);
+    const item = { ...entry, isNew: false, inShop };
+    const card = createCard(item, !!entry.price);
+    if (inShop) {
+      // Add "in shop today" stripe
+      card.style.boxShadow = '0 0 0 2px rgba(34,197,94,0.5)';
+      const bar = document.createElement('div');
+      bar.style.cssText = 'background:rgba(34,197,94,.12);border-bottom:1px solid rgba(34,197,94,.3);padding:4px 10px;font-size:10px;font-weight:600;color:#22c55e;letter-spacing:.5px;text-transform:uppercase;text-align:center';
+      bar.textContent = '✓ In shop today';
+      card.querySelector('.item-img-wrap').insertAdjacentElement('beforebegin', bar);
+    }
+    grid.appendChild(card);
+  }
+}
+
+function checkWishlistInShop() {
+  const hits = wishlist.filter(w => shopItems.some(s=>s.id===w.id));
+  if (hits.length > 0) {
+    setTimeout(() => showToast(`🎉 ${hits.length} wishlisted item${hits.length>1?'s are':' is'} in today's shop!`,'🛒'), 1200);
+  }
+}
+
+// ── EMAIL ──────────────────────────────────────────────────────────────────────
+// Email alerts backend.
+//   - Empty string  -> standalone mode: the page just remembers the email locally.
+//   - 'same-origin' -> the alert function is deployed on THIS same site (Netlify).
+//   - full URL      -> backend lives elsewhere, e.g. 'https://your-site.netlify.app'.
+// After deploying to Netlify, change this to 'same-origin'.
+const ALERTS_API = '';
+
+function alertsEndpoint() {
+  if (ALERTS_API === 'same-origin') return '/api/alerts';
+  return ALERTS_API ? ALERTS_API.replace(/\/$/, '') + '/api/alerts' : '';
+}
+
+async function saveEmail() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    showToast('Enter a valid email address.','⚠️'); return;
+  }
+  savedEmail = email;
+  localStorage.setItem('fn-email', email);
+
+  const successEl = document.getElementById('email-success');
+
+  if (!ALERTS_API) {
+    // No backend wired yet — be honest that nothing will actually send.
+    successEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Saved on this device. Connect a backend to start sending alerts.';
+    successEl.classList.add('show');
+    showToast('Email saved locally.','✅');
+    setTimeout(()=>successEl.classList.remove('show'), 5000);
+    return;
+  }
+
+  try {
+    const res = await fetch(alertsEndpoint(), {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        email,
+        items: wishlist.map(w => ({ id: w.id, name: w.name })),
+      }),
+    });
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    successEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> You\'re set. We\'ll email you the day a wishlisted item hits the shop.';
+    successEl.classList.add('show');
+    showToast('Alerts on.','✅');
+    setTimeout(()=>successEl.classList.remove('show'), 5000);
+  } catch (err) {
+    console.error('Alert signup failed:', err);
+    showToast('Couldn\'t reach the alert server. Try again.','⚠️');
+  }
+}
+
+function updateNotifyView() {
+  const view = document.getElementById('notify-wishlist-view');
+  if (wishlist.length === 0) {
+    view.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding:20px 0">Add items to your wishlist and they\'ll appear here.</div>';
+    return;
+  }
+  let html = '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">';
+  for (const entry of wishlist) {
+    const color = rarityColor(entry.rarityKey);
+    const inShop = shopItems.some(s=>s.id===entry.id);
+    html += `<div class="notify-item-tag" style="border-color:${color}33">
+      <div style="width:8px;height:8px;border-radius:50%;background:${color};flex-shrink:0"></div>
+      ${entry.name}
+      ${inShop ? '<span style="font-size:10px;color:var(--success);font-weight:600">● IN SHOP</span>' : ''}
+      <button class="remove-tag" onclick="toggleWishlist(null,'${entry.id}')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`;
+  }
+  html += '</div>';
+  view.innerHTML = html;
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────────────
+function openModal(item) {
+  currentItem = item;
+  const color = rarityColor(item.rarityKey);
+  const isW = wishlist.some(w=>w.id===item.id);
+  const inShop = shopItems.some(s=>s.id===item.id);
+
+  const imgHtml = item.image
+    ? `<img class="modal-img" src="${item.image}" alt="${item.name}"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+    : '';
+  const phStyle = item.image ? 'display:none' : '';
+
+  document.getElementById('modal-content').innerHTML = `
+    ${imgHtml}
+    <div class="modal-img-placeholder" style="${phStyle}">${typeEmoji(item.type)}</div>
+    <div class="modal-body">
+      ${inShop ? `<div class="in-shop-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Available in today's shop</div>` : ''}
+      <div class="modal-rarity-tag" style="background:${color}22;color:${color};border:1px solid ${color}44">
+        <div style="width:6px;height:6px;border-radius:50%;background:${color}"></div>
+        ${rarityLabel(item.rarityKey)} ${item.type}
+      </div>
+      <div class="modal-name">${item.name}</div>
+      ${item.description ? `<div class="modal-desc">${item.description}</div>` : ''}
+      ${item.price ? `
+        <div class="modal-price-row">
+          <div class="modal-price"><div class="modal-vbucks">V</div>${item.price.toLocaleString()}</div>
+          ${item.regularPrice && item.regularPrice!==item.price
+            ? `<div style="font-size:13px;color:var(--text-muted)">Was: <span style="text-decoration:line-through">${item.regularPrice.toLocaleString()}</span></div>`
+            : `<div style="font-size:13px;color:var(--text-muted)">V-Bucks</div>`}
+        </div>` : ''}
+      <div class="modal-actions">
+        <button class="btn-secondary" id="modal-heart" onclick="toggleWishlist(null,'${item.id}');updateModalHeart('${item.id}')"
+          style="${isW?'background:var(--accent-2-dim);border-color:rgba(168,85,247,.4);color:var(--accent-2)':''}">
+          ${isW ? '💜 Wishlisted' : '🤍 Add to Wishlist'}
+        </button>
+        <button class="btn-primary" onclick="showSection('notify');closeModalDirect()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          Set Alert
+        </button>
+      </div>
+    </div>`;
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function updateModalHeart(id) {
+  const isW = wishlist.some(w=>w.id===id);
+  const btn = document.getElementById('modal-heart');
+  if (!btn) return;
+  btn.textContent = isW ? '💜 Wishlisted' : '🤍 Add to Wishlist';
+  btn.style.background = isW ? 'var(--accent-2-dim)' : '';
+  btn.style.borderColor = isW ? 'rgba(168,85,247,.4)' : '';
+  btn.style.color = isW ? 'var(--accent-2)' : '';
+}
+
+function closeModal(e) { if (e.target===document.getElementById('modal-overlay')) closeModalDirect(); }
+function closeModalDirect() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentItem = null;
+}
+
+// ── SECTIONS ──────────────────────────────────────────────────────────────────
+function showSection(name) {
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('section-'+name).classList.add('active');
+  document.getElementById('nav-'+name)?.classList.add('active');
+  if (name==='wishlist') renderWishlist();
+  if (name==='notify') {
+    updateNotifyView();
+    if (savedEmail) document.getElementById('email-input').value = savedEmail;
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(text, icon='✨') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = text;
+  document.getElementById('toast-icon').textContent = icon;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModalDirect(); });
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+syncWishlistUI();
+loadShop();
+</script>
+</body>
+</html>
