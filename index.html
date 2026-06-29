@@ -1004,7 +1004,7 @@ function checkWishlistInShop() {
 //   - 'same-origin' -> the alert function is deployed on THIS same site (Netlify).
 //   - full URL      -> backend lives elsewhere, e.g. 'https://your-site.netlify.app'.
 // After deploying to Netlify, change this to 'same-origin'.
-const ALERTS_API = '';
+const ALERTS_API = 'same-origin';
 
 function alertsEndpoint() {
   if (ALERTS_API === 'same-origin') return '/api/alerts';
